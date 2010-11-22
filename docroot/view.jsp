@@ -15,8 +15,10 @@
 %>
 
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
+<%@ taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %>
 
-<portlet:defineObjects />
+
+<liferay-theme:defineObjects />
 
 <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
 <noscript>
@@ -25,4 +27,12 @@
   </div>
 </noscript>
 
-<div id="chatrooms-portlet"></div>
+<%
+String portletId = portletDisplay.getId();
+%>
+
+<script type="text/javascript" language="javascript" >
+	chatroomPortletInstances[chatroomPortletInstances.length] = "<%=portletId %>";
+</script>
+
+<div id="chatrooms-portlet-<%=portletId %>"></div>
