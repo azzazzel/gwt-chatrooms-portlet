@@ -6,7 +6,9 @@
 		<portlet-name>gwt-chatrooms</portlet-name>
 		<icon>/icon.png</icon>
 		<instanceable>true</instanceable>
+		<ajaxable>false</ajaxable>
 		<header-portlet-css>/css/main.css</header-portlet-css>
+		<header-portlet-javascript>/js/chatrooms.js</header-portlet-javascript>
 		<footer-portlet-javascript>/Chatrooms/Chatrooms.nocache.js</footer-portlet-javascript>
 		<css-class-wrapper>gwt-chatrooms-portlet</css-class-wrapper>
 	</portlet>
