@@ -2,4 +2,47 @@
 
 <project name="gwt-chatrooms-portlet" basedir="." default="deploy">
 	<import file="../build-common-portlet.xml" />
+	
+	  <!-- Arguments to gwtc and devmode targets -->
+	  <property name="gwt.args" value="" />
+
+
+	  <path id="project.class.path">
+	    <pathelement location="docroot/WEB-INF/classes"/>
+	    <pathelement location="${gwt.sdk}/gwt-user.jar"/>
+	    <fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
+	    <!-- Add any additional non-server libs (such as JUnit) -->
+	    <fileset dir="docroot/WEB-INF/lib" includes="**/*.jar"/>
+	  </path>
+
+	  <target name="gwt_libs" description="Copy libs to WEB-INF/lib">
+	    <mkdir dir="docroot/WEB-INF/lib" />
+	    <copy todir="docroot/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
+	    <!-- Add any additional server libs that need to be copied -->
+	    <copy todir="docroot/WEB-INF/lib" file="${gwt.sdk}/gwt-user.jar" />
+	    <copy todir="docroot/WEB-INF/lib">
+	      <fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
+	    </copy>
+	    <copy todir="docroot/WEB-INF/classes">
+	      <fileset dir="docroot/WEB-INF/src" excludes="**/*.java"/>
+	    </copy>
+	  </target>
+
+	  <target name="gwtc" depends="gwt_libs, compile" description="GWT compile to JavaScript">
+	    <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+	      <classpath>
+	        <pathelement location="docroot/WEB-INF/src"/>
+	        <path refid="project.class.path"/>
+	      </classpath>
+	      <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
+	      <jvmarg value="-Xmx256M"/>
+	      <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+	      <arg value="-war" />
+	      <arg value="docroot" />
+	      <arg line="${gwt.args}"/>
+	      <arg value="com.commsen.sample.portlet.chatrooms.Chatrooms"/>
+	    </java>
+	  </target>
+	
 </project>
+

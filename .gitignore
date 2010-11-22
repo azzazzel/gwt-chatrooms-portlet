@@ -1,0 +1,7 @@
+.classpath
+.project
+bin
+docroot/Chatrooms
+docroot/WEB-INF/classes
+docroot/WEB-INF/lib
+
