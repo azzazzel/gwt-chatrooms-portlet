@@ -18,4 +18,11 @@
 
 <portlet:defineObjects />
 
-This is the <b>GWT chat rooms</b> portlet.
+<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+<noscript>
+  <div style="color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+    Your web browser must have JavaScript enabled in order for this portlet to display correctly.
+  </div>
+</noscript>
+
+<div id="chatrooms-portlet"></div>
