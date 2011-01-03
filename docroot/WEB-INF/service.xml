@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 5.2.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_5_2_0.dtd">
+
+<!-- 
+   This file is part of CustomGlobalMarkup Liferay plug-in.
+  	
+   CustomGlobalMarkup Liferay plug-in is free software: you can redistribute it and/or modify 
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
+   
+   CustomGlobalMarkup Liferay plug-in is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public License
+   along with CustomGlobalMarkup Liferay plug-in.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
+ -->
+
+<service-builder package-path="com.commsen.sample.portlet.chatrooms">
+	<!--
+		Author will be inserted into Java Doc comments in generated classes
+	-->
+	<author>Milen Dyankov</author>
+	
+	<!--
+		Tables in the database will have their names prepended with "<namespace>"
+	-->
+	<namespace>Chatrooms</namespace>
+
+	<entity name="Message" local-service="true" remote-service="false">
+		<!-- Primary key column -->
+		<column name="id" type="long" primary="true" />
+
+		<!-- Other columns -->
+		<column name="time" type="Date" />
+		<column name="chatroom" type="String" />
+		<column name="user" type="String" />
+		<column name="message" type="String" />
+
+		<order by="asc">
+			<order-column name="time"></order-column>
+		</order>
+
+		<!-- Finder Methods -->				
+		<finder name="Chatroom" return-type="Collection">
+			<finder-column name="chatroom" />
+		</finder>
+		
+	</entity>
+
+</service-builder>

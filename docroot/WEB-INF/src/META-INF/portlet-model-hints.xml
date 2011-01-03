@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<model-hints>
+	<model name="com.commsen.sample.portlet.chatrooms.model.Message">
+		<field name="id" type="long" />
+		<field name="time" type="Date" />
+		<field name="chatroom" type="String" />
+		<field name="user" type="String" />
+		<field name="message" type="String">
+			<hint name="max-length">1000</hint>
+		</field>
+	</model>
+</model-hints>
