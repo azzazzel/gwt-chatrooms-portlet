@@ -1,0 +1,14 @@
+.message-entry {
+	width: 100%; 
+	margin: 3px; 
+}
+.message-entry-author {
+	background-color: silver;
+	border: 1px solid gray; 
+}
+.message-entry-text {
+	background-color: white;
+	border: 1px solid silver;
+	width: 100%; 
+	height: 100%; 
+}
