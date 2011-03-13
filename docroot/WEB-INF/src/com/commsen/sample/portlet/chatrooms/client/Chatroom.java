@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class Chatroom {
 
-	private String portletInstanceId = "";
+	private ChatroomJsObject portletInstance = null;
 	private String currentRoom = null;
 	private Date lastMessageTime = null;
 	private final ChatroomServiceAsync chatroomService = GWT.create(ChatroomService.class);
@@ -42,17 +42,17 @@ public class Chatroom {
 	private boolean updateInProgress = false;
 	
 	
-	public Chatroom(String instanceId) {
+	public Chatroom(ChatroomJsObject portletInstance) {
 	
 		/*
 		 * Remember the portlet instance
 		 */
-		this.portletInstanceId = instanceId;
+		this.portletInstance = portletInstance;
 
 		/*
 		 * Change the URL of chatroomSevice servlet
 		 */
-		((ServiceDefTarget) chatroomService).setServiceEntryPoint("/delegate/chatroomService");
+		((ServiceDefTarget) chatroomService).setServiceEntryPoint(portletInstance.getResourceURL());
 		
 		/*
 		 * Prepare GUI
@@ -97,7 +97,7 @@ public class Chatroom {
 		mainPanel.add(messageAreaScrollPanel);
 		mainPanel.add(messagePanel);
 		
-		RootPanel.get("chatrooms-portlet-" + portletInstanceId).add(mainPanel);
+		RootPanel.get("chatrooms-portlet-" + portletInstance.getId()).add(mainPanel);
 	}
 
 	

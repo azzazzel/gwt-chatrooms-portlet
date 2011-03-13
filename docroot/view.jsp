@@ -31,8 +31,9 @@
 String portletId = portletDisplay.getId();
 %>
 
+
 <script type="text/javascript" language="javascript" >
-	chatroomPortletInstances[chatroomPortletInstances.length] = "<%=portletId %>";
+	chatroomPortletInstances[chatroomPortletInstances.length] = new ChatroomPortlet("<%=portletId %>", "<portlet:renderURL />", "<portlet:actionURL />", "<portlet:resourceURL />");
 </script>
 
 <div id="chatrooms-portlet-<%=portletId %>"></div>
