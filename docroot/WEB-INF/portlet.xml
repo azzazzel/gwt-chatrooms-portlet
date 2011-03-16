@@ -9,7 +9,7 @@
 	<portlet>
 		<portlet-name>gwt-chatrooms</portlet-name>
 		<display-name>GWT chat rooms</display-name>
-		<portlet-class>com.liferay.util.bridges.mvc.MVCPortlet</portlet-class>
+		<portlet-class>com.commsen.sample.portlet.chatrooms.server.ChatroomPortlet</portlet-class>
 		<init-param>
 			<name>view-jsp</name>
 			<value>/view.jsp</value>
