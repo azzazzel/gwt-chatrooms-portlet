@@ -1,18 +1,23 @@
 package com.commsen.sample.portlet.chatrooms.client;
 
 import java.util.Date;
-import java.util.List;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -26,8 +31,7 @@ public class Chatroom {
 
 	private ChatroomJsObject portletInstance = null;
 	private String currentRoom = null;
-	private Date lastMessageTime = null;
-	private final ChatroomServiceAsync chatroomService = GWT.create(ChatroomService.class);
+	private long lastMessageTime = 0;
 
 	private final TextBox roomNameBox = new TextBox();
 	private final Button enterTheRoomButton = new Button("enter the room");
@@ -41,6 +45,7 @@ public class Chatroom {
 	private Timer messageUpdater;
 	private boolean updateInProgress = false;
 	
+	private RequestBuilder requestBuilder = null;
 	
 	public Chatroom(ChatroomJsObject portletInstance) {
 	
@@ -50,10 +55,10 @@ public class Chatroom {
 		this.portletInstance = portletInstance;
 
 		/*
-		 * Change the URL of chatroomSevice servlet
+		 * Prepare RequestBuilder
 		 */
-		((ServiceDefTarget) chatroomService).setServiceEntryPoint(portletInstance.getResourceURL());
-		
+		requestBuilder = new RequestBuilder(RequestBuilder.POST, portletInstance.getResourceURL());
+
 		/*
 		 * Prepare GUI
 		 */
@@ -168,46 +173,85 @@ public class Chatroom {
 		currentRoom = null;
 		roomNameBox.setEnabled(true);
 		messageArea.clear();
-		lastMessageTime = null;
+		lastMessageTime = 0;
 		messageBox.setEnabled(false);
 		sendMessageButton.setEnabled(false);
 	}
 
 	private void sendMessageToServer (String message) {
-		chatroomService.sendMessage(currentRoom, message, new AsyncCallback<String>() {
-			@Override
-			public void onSuccess(String message) {
-				// do nothing
-			}
-			
-			@Override
-			public void onFailure(Throwable paramThrowable) {
-				Window.alert("Error: " + paramThrowable.getMessage());
-			}
-		});
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("action", new JSONString("saveMessage"));
+		jsonObject.put("currentRoom", new JSONString(currentRoom));
+		jsonObject.put("message", new JSONString(message));
+		try {
+	        requestBuilder.sendRequest(jsonObject.toString(), new RequestCallback() {
+	        	
+	        	@Override
+	        	public void onResponseReceived(Request request, Response response) {
+	        		if (200 == response.getStatusCode()) {
+	        			// do nothing
+	        		} else {
+	        			Window.alert("Error with JSON communication! Got response: " + response.getStatusCode() + " "
+	        			        + response.getStatusText());
+	        		}
+	        	}
+	        
+	        	@Override
+	        	public void onError(Request request, Throwable throwable) {
+	        		Window.alert("Error: " + throwable.getMessage());
+	        	}
+	        });
+        } catch (RequestException e) {
+        	Window.alert("Error: " + e.getMessage());
+        }
 	}
 	
 	private void getMessages() {
-		chatroomService.getMessages(currentRoom, lastMessageTime, new AsyncCallback<List<MessageDTO>>() {
-			@Override
-			public void onSuccess(List<MessageDTO> messages) {
-				updateInProgress = true;
-				if (messages != null) {
-					for (MessageDTO messageDTO : messages) {
-						messageArea.add(new MessagePanel(messageDTO));
-						lastMessageTime = messageDTO.getTime();
-					}
-				}
-				updateInProgress = false;
-			}
-			
-			@Override
-			public void onFailure(Throwable paramThrowable) {
-				Window.alert("Error: " + paramThrowable.getMessage());
-			}
-		});
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("action", new JSONString("getMessages"));
+		jsonObject.put("currentRoom", new JSONString(currentRoom));
+		jsonObject.put("lastMessageTime", new JSONNumber(lastMessageTime));
+
+		try {
+	        requestBuilder.sendRequest(jsonObject.toString(), new RequestCallback() {
+	        	
+	        	@Override
+	        	public void onResponseReceived(Request request, Response response) {
+	        		if (200 == response.getStatusCode()) {
+	        			JsArray<ChatroomMessageJsObject> messages = json2ChatroomMessages(response.getText());
+	        			updateInProgress = true;
+	        			if (messages != null) {
+	        				for (int i = 0; i < messages.length(); i++) {
+	        					ChatroomMessageJsObject message = messages.get(i);
+	        					messageArea.add(new MessagePanel(message));
+	        					lastMessageTime = (long)message.getTime();
+	        				}
+	        			}
+	        			updateInProgress = false;
+	        		} else {
+	        			Window.alert("Error with JSON communication! Got response: " + response.getStatusCode() + " "
+	        			        + response.getStatusText());
+	        		}
+	        	}
+	        	
+	        
+	        	@Override
+	        	public void onError(Request request, Throwable throwable) {
+	        		Window.alert("Error: " + throwable.getMessage());
+	        	}
+	        });
+        } catch (RequestException e) {
+    		Window.alert("Error: " + e.getMessage());
+        }
 	}
 
+	public static final native JsArray<ChatroomMessageJsObject> json2ChatroomMessages(
+			String json)
+	/*-{ 
+	  	return eval(json); 
+	}-*/;
+	
+	
 	
 	/**
 	 * This class represents a single message in message area
@@ -218,18 +262,18 @@ public class Chatroom {
 	private static class MessagePanel extends HorizontalPanel {
 		private static final DateTimeFormat TIME_FORMAT = DateTimeFormat.getFormat("dd-MM-yy HH:mm:ss");
 
-		public MessagePanel(MessageDTO messageDTO) {
+		public MessagePanel(ChatroomMessageJsObject message) {
 			super();
 			this.addStyleName("message-entry");
 			VerticalPanel verticalPanel = new VerticalPanel();
 			verticalPanel.addStyleName("message-entry-author");
 			verticalPanel.setWidth("150px");
-			verticalPanel.add(new Label(messageDTO.getUser()));
-			verticalPanel.add(new Label(TIME_FORMAT.format(messageDTO.getTime())));
+			verticalPanel.add(new Label(message.getUser()));
+			verticalPanel.add(new Label(TIME_FORMAT.format(new Date((long)message.getTime()))));
 
 			add(verticalPanel);
 			
-			Label text = new Label(messageDTO.getMessage());
+			Label text = new Label(message.getMessage());
 			text.setWidth("100%");
 			text.addStyleName("message-entry-text");
 			add(text);

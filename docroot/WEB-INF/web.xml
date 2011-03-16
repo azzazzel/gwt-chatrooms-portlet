@@ -3,30 +3,4 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
     http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-
-	<servlet>
-		<servlet-name>chatroomService</servlet-name>
-		<servlet-class>com.liferay.portal.kernel.servlet.PortalDelegateServlet</servlet-class>
-		<init-param>
-			<param-name>servlet-class</param-name>
-			<param-value>com.commsen.sample.portlet.chatrooms.server.ChatroomServiceImpl</param-value>
-		</init-param>
-		<init-param>
-			<param-name>sub-context</param-name>
-			<param-value>chatroomService</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-
-	<servlet>
-		<servlet-name>ChatroomService</servlet-name>
-		<servlet-class>com.commsen.sample.portlet.chatrooms.server.ChatroomServiceImpl</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>ChatroomService</servlet-name>
-		<url-pattern>/Chatrooms/chatroom_service</url-pattern>
-	</servlet-mapping>
-
 </web-app>
