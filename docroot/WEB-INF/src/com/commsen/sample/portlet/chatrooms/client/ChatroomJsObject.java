@@ -1,6 +1,7 @@
 package com.commsen.sample.portlet.chatrooms.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.History;
 
 public class ChatroomJsObject extends JavaScriptObject {
 
@@ -19,4 +20,15 @@ public class ChatroomJsObject extends JavaScriptObject {
 
     public final native String getResourceURL() /*-{ return this.resourceURL }-*/;
 
+
+    public final native String getState() 
+    /*-{ 
+        return this.getState();
+    }-*/;
+
+    public final native void setState(String state) 
+    /*-{ 
+        this.setState(state)
+    }-*/;
+    
 }

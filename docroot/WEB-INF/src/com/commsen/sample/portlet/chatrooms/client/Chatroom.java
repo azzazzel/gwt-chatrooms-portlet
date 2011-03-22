@@ -7,6 +7,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -16,6 +18,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
@@ -27,8 +30,12 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class Chatroom {
+public class Chatroom implements ValueChangeHandler<String> {
 
+	public static final String STATE_DELIMITER = ":";
+	public static final String STATE_INIT = "INIT";
+	public static final String STATE_JOINED_GROUP = "GROUP";
+	
 	private ChatroomJsObject portletInstance = null;
 	private String currentRoom = null;
 	private long lastMessageTime = 0;
@@ -64,7 +71,12 @@ public class Chatroom {
 		 */
 		drawGUI();
 		prepareHandlers();
-		displayInitialState();
+		
+		History.addValueChangeHandler(this);
+ 		
+		String state = portletInstance.getState();
+		if (state == null || state.isEmpty()) state = STATE_INIT;
+		handleState(state);
 		
 		/*
 		 * Configure the timer to retrieve messages every second
@@ -124,7 +136,9 @@ public class Chatroom {
 		enterTheRoomButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent clickEvent) {
-				displayChatroomState(roomNameBox.getValue());
+				String room = roomNameBox.getValue();
+				displayChatroomState(room);
+				saveState(STATE_JOINED_GROUP + STATE_DELIMITER + room);
 			}
 		});
 
@@ -132,6 +146,7 @@ public class Chatroom {
 			@Override
 			public void onClick(ClickEvent clickEvent) {
 				displayInitialState();
+				saveState(STATE_INIT);
 			}
 		});
 		
@@ -154,6 +169,7 @@ public class Chatroom {
 		leaveTheRoomButton.setEnabled(true);
 		enterTheRoomButton.setEnabled(false);
 		roomNameBox.setEnabled(false);
+		roomNameBox.setText(room);
 		messageBox.setEnabled(true);
 		sendMessageButton.setEnabled(true);
 	}
@@ -169,9 +185,9 @@ public class Chatroom {
 			enterTheRoomButton.setEnabled(true);
 			leaveTheRoomButton.setEnabled(false);
 		}
-		roomNameBox.setValue(currentRoom);
-		currentRoom = null;
+		roomNameBox.setText(currentRoom);
 		roomNameBox.setEnabled(true);
+		currentRoom = null;
 		messageArea.clear();
 		lastMessageTime = 0;
 		messageBox.setEnabled(false);
@@ -251,7 +267,49 @@ public class Chatroom {
 	  	return eval(json); 
 	}-*/;
 	
+	public void saveState(String state) {
+		portletInstance.setState(state);
+		History.newItem(portletInstance.getId() + STATE_DELIMITER + state);
+	}
+		 
+	@Override
+	public void onValueChange(ValueChangeEvent<String> paramValueChangeEvent) {
+		String token = paramValueChangeEvent.getValue();
+		if (token == null || token.trim().isEmpty()) {
+			handleState(STATE_INIT);
+		} else {
+			String state = getStateFromToken(paramValueChangeEvent.getValue());
+			if (state != null) {
+				handleState(state);
+			}
+		}
+	}
 	
+	private String getStateFromToken(String token) {
+		if (token == null)
+			return null;
+		int index = token.indexOf(STATE_DELIMITER);
+		if (index > 0) {
+			if (token.substring(0, index).equals(portletInstance.getId())) {
+				return token.substring(index + 1, token.length());
+			}
+		}
+		return null;
+	}
+	
+	private void handleState(String state) {
+		if (state.startsWith(STATE_JOINED_GROUP)) {
+			int index = state.indexOf(STATE_DELIMITER);
+			if (index > 0) {
+				String room = state.substring(index + 1, state.length());
+				displayChatroomState(room);
+			}
+		}
+		if (state.equals(STATE_INIT)) {
+			displayInitialState();
+		}
+	}
+		 	
 	
 	/**
 	 * This class represents a single message in message area
